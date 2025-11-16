@@ -6,9 +6,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 
-importudiantController;
+import com.example.gestionetudiant.controller.EtudiantController;
 import com.example.gestionetudiant.repository.EtudiantRepository;
 import com.example.gestionetudiant.model.Etudiant;
+
 @ExtendWith(MockitoExtension.class)
 class EtudiantControllerTest {
 

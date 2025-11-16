@@ -10,7 +10,7 @@ pipeline {
             steps {
                 checkout scm
                 script {
-                    shortSha = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
+                    def shortSha = sh(returnStdout: true, script: "git rev-parse --short HEAD").trim()
                     env.IMAGE_TAG = "${env.BUILD_NUMBER}-${shortSha}"
                 }
             }
