@@ -1,10 +1,14 @@
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.beans.factory.annotation.Autowired;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+package com.example.gestionetudiant;
 
 import com.example.gestionetudiant.model.Etudiant;
 import com.example.gestionetudiant.repository.EtudiantRepository;
+
+import org.junit.jupiter.api.Test;
+import.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 @SpringBootTest
 class EtudiantServiceTest {
 

@@ -1,14 +1,19 @@
+package com.example.gestionetudiant;
+
+import com.example.gestionetudiant.controller.EtudiantController;
+import com.example.gestionetudiant.model.Etudiant;
+import com.example.gestionetudiant.repository.EtudiantRepository;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
-
-import com.example.gestionetudiant.controller.EtudiantController;
-import com.example.gestionetudiant.repository.EtudiantRepository;
-import com.example.gestionetudiant.model.Etudiant;
 
 @ExtendWith(MockitoExtension.class)
 class EtudiantControllerTest {
@@ -20,9 +25,9 @@ class EtudiantControllerTest {
     private EtudiantController controller;
 
     @Test
-    void testGetEtudiants() {
+    void testGetAllEtudiants() {
         when(repository.findAll()).thenReturn(List.of(new Etudiant()));
-        List<Etudiant> result = controller.getEtudiants();
+        List<Etudiant> result = controller.getAll(); // ✅ méthode corrigée
         assertFalse(result.isEmpty());
     }
 }
