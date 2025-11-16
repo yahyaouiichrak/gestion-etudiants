@@ -1,11 +1,10 @@
 pipeline {
   agent any
+
   environment {
-    JAVA_HOME = tool 'jdk17'
-    MVN_HOME  = tool 'maven-3.9'
-    PATH = "${JAVA_HOME}/bin:${MVN_HOME}/bin:${env.PATH}"
     DOCKER_IMAGE = "ichrakyhy/gestion-etudiants"
   }
+
   stages {
     stage('Checkout Code') {
       steps {
@@ -16,12 +15,22 @@ pipeline {
         }
       }
     }
+
     stage('Build JAR') {
       steps {
-        sh 'mvn -B -DskipTests clean package'
+        sh '''
+          echo "== Versions sur l'agent =="
+          which mvn || true
+          mvn -v || true
+          which java || true
+          java -version || true
+
+          mvn -B -DskipTests clean package
+        '''
         archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
       }
     }
+
     stage('Docker Build') {
       steps {
         sh """
@@ -31,10 +40,9 @@ pipeline {
         """
       }
     }
+
     stage('Docker Push') {
-      environment {
-        DOCKERHUB_CREDS = credentials('dockerhub-creds')
-      }
+      environment { DOCKERHUB_CREDS = credentials('dockerhub-creds') }
       steps {
         sh '''
           echo "${DOCKERHUB_CREDS_PSW}" | docker login -u "${DOCKERHUB_CREDS_USR}" --password-stdin
@@ -45,6 +53,7 @@ pipeline {
       }
     }
   }
+
   post {
     success { echo "✅ Image poussée: ${DOCKER_IMAGE}:${IMAGE_TAG}" }
     failure { echo "❌ Échec Étape 1" }
