@@ -1,29 +1,66 @@
-package com.example.gestionetudiant;
+package com.example.gestionetudiant.service;
 
 import com.example.gestionetudiant.model.Etudiant;
 import com.example.gestionetudiant.repository.EtudiantRepository;
-
+import com.example.gestionetudiant.service.impl.EtudiantServiceImpl;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.List;
+import java.util.Optional;
 
-@SpringBootTest
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
 class EtudiantServiceTest {
 
-    @Autowired
+    @Mock
     private EtudiantRepository repository;
+
+    @InjectMocks
+    private EtudiantServiceImpl service;
+
+    @Test
+    void testGetAllEtudiants() {
+        when(repository.findAll()).thenReturn(List.of(new Etudiant()));
+        List<Etudiant> result = service.getAllEtudiants();
+        assertFalse(result.isEmpty());
+    }
+
+    @Test
+    void testGetEtudiantById() {
+        Etudiant e = new Etudiant();
+        e.setId(1L);
+        when(repository.findById(1L)).thenReturn(Optional.of(e));
+        Optional<Etudiant> result = service.getEtudiantById(1L);
+        assertTrue(result.isPresent());
+        assertEquals(1L, result.get().getId());
+    }
 
     @Test
     void testCreateEtudiant() {
         Etudiant e = new Etudiant();
-        e.setNom("Ali");
-        e.setPrenom("Ahmed");
-        e.setEmail("ali@example.com");
-        e.setNiveau("Licence");
+        when(repository.save(e)).thenReturn(e);
+        Etudiant result = service.createEtudiant(e);
+        assertNotNull(result);
+    }
 
-        Etudiant saved = repository.save(e);
-        assertNotNull(saved.getId());
+    @Test
+    void testUpdateEtudiant() {
+        Etudiant e = new Etudiant();
+        e.setId(1L);
+        when(repository.save(e)).thenReturn(e);
+        Etudiant result = service.updateEtudiant(1L, e);
+        assertEquals(1L, result.getId());
+    }
+
+    @Test
+    void testDeleteEtudiant() {
+        service.deleteEtudiant(1L);
+        verify(repository, times(1)).deleteById(1L);
     }
 }

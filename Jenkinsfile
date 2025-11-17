@@ -18,13 +18,13 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh 'mvn test'
+                sh 'mvn test -Dspring.profiles.active=test'
             }
         }
 
         stage('Build JAR') {
             steps {
-                sh 'mvn -B clean package'
+                sh 'mvn -B clean package -Dspring.profiles.active=test'
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
