@@ -1,9 +1,9 @@
-package com.example.GestionEtudiant;
+package com.example.gestionetudiant;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(classes = GestionEtudiantApplication.class)
 class GestionEtudiantApplicationTests {
 
 	@Test
