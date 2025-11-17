@@ -18,13 +18,13 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh 'mvn test -Dspring.profiles.active=test'
+                sh 'mvn test' // Tests se connectent à PostgreSQL réel
             }
         }
 
         stage('Build JAR') {
             steps {
-                sh 'mvn -B clean package -Dspring.profiles.active=test'
+                sh 'mvn -B clean package'
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
@@ -32,9 +32,7 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh """
-                  docker build \
-                    -t ${DOCKER_IMAGE}:${IMAGE_TAG} \
-                    -t ${DOCKER_IMAGE}:latest .
+                  docker build -t ${DOCKER_IMAGE}:${IMAGE_TAG} -t ${DOCKER_IMAGE}:latest .
                 """
             }
         }
