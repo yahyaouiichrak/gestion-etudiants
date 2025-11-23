@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = "ichrakyhy/gestion-etudiants"
+        SONAR_TOKEN = credentials('sonar-token')
     }
 
     stages {
@@ -25,15 +26,11 @@ pipeline {
         // ----------------------------------
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('sonar-server') {
-                    sh """
-                        mvn sonar:sonar \
-                          -Dsonar.projectKey=gestion-etudiants \
-                          -Dsonar.projectName=Gestion Etudiants \
-                          -Dsonar.host.url=$SONAR_HOST_URL \
-                          -Dsonar.login=$SONAR_AUTH_TOKEN
-                    """
-                }
+            sh "mvn sonar:sonar \
+                -Dsonar.projectKey=gestion-etudiants \
+                -Dsonar.projectName=gestion-etudiants \
+                -Dsonar.host.url=http://localhost:9000 \
+                -Dsonar.login=${SONAR_TOKEN}"
             }
         }
 
