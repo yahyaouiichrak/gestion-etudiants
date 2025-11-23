@@ -70,9 +70,16 @@ pipeline {
             }
         }
 
+      
         stage('Trivy - Docker Image Scan') {
             steps {
-                timeout(time: 15, unit: 'MINUTES') {
+                script {
+                    // Vérifier si la base Java existe
+                    def javaDbExists = sh(script: 'test -d ~/.cache/trivy/java-db', returnStatus: true) == 0
+                    if (!javaDbExists) {
+                        echo "Java DB not found. Downloading..."
+                        sh 'trivy --download-java-db'
+                    }
                     sh """
                         trivy image --skip-db-update --skip-java-db-update \
                         --scanners vuln --exit-code 0 --severity HIGH,CRITICAL ${DOCKER_IMAGE}:latest
@@ -80,6 +87,7 @@ pipeline {
                 }
             }
         }
+
     }
 
     post {
