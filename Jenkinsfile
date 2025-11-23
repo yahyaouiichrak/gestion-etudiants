@@ -6,6 +6,7 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout Code') {
             steps {
                 checkout scm
@@ -16,9 +17,22 @@ pipeline {
             }
         }
 
+        stage('Start PostgreSQL for tests') {
+            steps {
+                sh '''
+                docker run -d --name pg-test \
+                    -e POSTGRES_USER=postgres \
+                    -e POSTGRES_PASSWORD=0000 \
+                    -e POSTGRES_DB=etudiantdb \
+                    -p 5433:5432 postgres:15
+                sleep 10
+                '''
+            }
+        }
+
         stage('Run Tests') {
             steps {
-                sh 'mvn test' // Tests se connectent à PostgreSQL réel
+                sh 'mvn -Dspring.profiles.active=test test'
             }
         }
 
@@ -38,7 +52,9 @@ pipeline {
         }
 
         stage('Docker Push') {
-            environment { DOCKERHUB_CREDS = credentials('dockerhub-creds') }
+            environment {
+                DOCKERHUB_CREDS = credentials('dockerhub-creds')
+            }
             steps {
                 sh '''
                   echo "${DOCKERHUB_CREDS_PSW}" | docker login -u "${DOCKERHUB_CREDS_USR}" --password-stdin
@@ -48,18 +64,12 @@ pipeline {
                 '''
             }
         }
-
-        stage('Deploy Locally') {
-            steps {
-                sh '''
-                  docker-compose down || true
-                  docker-compose up -d
-                '''
-            }
-        }
     }
 
     post {
+        always {
+            sh "docker rm -f pg-test || true"
+        }
         success { echo "✅ Pipeline terminé avec succès" }
         failure { echo "❌ Échec du pipeline" }
     }

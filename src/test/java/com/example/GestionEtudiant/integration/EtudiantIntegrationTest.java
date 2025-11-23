@@ -12,7 +12,6 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test") // Utilise H2
 class EtudiantIntegrationTest {
 
     @Autowired
@@ -20,7 +19,9 @@ class EtudiantIntegrationTest {
 
     @Test
     void testGetEtudiantsEndpoint() {
-        ResponseEntity<Etudiant[]> response = restTemplate.getForEntity("/etudiants", Etudiant[].class);
+        ResponseEntity<Etudiant[]> response =
+                restTemplate.getForEntity("/etudiants", Etudiant[].class);
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 }
