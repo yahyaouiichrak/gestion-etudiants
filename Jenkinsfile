@@ -26,13 +26,20 @@ pipeline {
         // ----------------------------------
         stage('SonarQube Analysis') {
             steps {
-            sh "mvn sonar:sonar \
-                -Dsonar.projectKey=gestion-etudiants \
-                -Dsonar.projectName=gestion-etudiants \
-                -Dsonar.host.url=http://10.0.0.2:9000 \
-                -Dsonar.login=${SONAR_TOKEN}"
+                withSonarQubeEnv('sonar-server') {
+                    sh """
+                        mvn clean install -DskipTests
+                        mvn sonar:sonar \
+                        -Dsonar.projectKey=gestion-etudiants \
+                        -Dsonar.projectName=gestion-etudiants \
+                        -Dsonar.host.url=http://10.0.0.2:9000 \
+                        -Dsonar.login=$SONAR_TOKEN \
+                        -Dsonar.java.binaries=target/classes
+                    """
+                }
             }
         }
+
 
         // ----------------------------------
         // 3️⃣ Trivy : Scan code source
