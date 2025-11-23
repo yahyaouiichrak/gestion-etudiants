@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -6,9 +7,13 @@ pipeline {
         SONAR_TOKEN = credentials('sonar-token')
     }
 
+    options {
+        timeout(time: 30, unit: 'MINUTES') // Timeout global pour éviter blocage
+    }
+
     stages {
 
-        // 1️⃣ Checkout + tag image
+        // 1️⃣ Checkout + Tag image
         stage('Checkout Code') {
             steps {
                 checkout scm
@@ -29,18 +34,18 @@ pipeline {
                           -Dsonar.projectKey=gestion-etudiants \
                           -Dsonar.projectName=gestion-etudiants \
                           -Dsonar.host.url=http://10.0.0.2:9000 \
-                          -Dsonar.login=$SONAR_TOKEN \
+                          -Dsonar.token=$SONAR_TOKEN \
                           -Dsonar.java.binaries=target/classes
                     """
                 }
             }
         }
 
-        // 3️⃣ Trivy FS
+        // 3️⃣ Trivy FS Scan
         stage('Trivy - File System Scan') {
             steps {
                 sh """
-                    trivy fs --exit-code 0 --severity HIGH,CRITICAL . > trivy-fs-report.txt
+                    trivy fs --skip-db-update --scanners vuln --exit-code 0 --severity HIGH,CRITICAL . > trivy-fs-report.txt
                 """
                 archiveArtifacts artifacts: 'trivy-fs-report.txt', fingerprint: true
             }
@@ -75,7 +80,7 @@ pipeline {
             }
         }
 
-        // 7️⃣ Docker build
+        // 7️⃣ Docker Build
         stage('Docker Build') {
             steps {
                 sh """
@@ -87,9 +92,11 @@ pipeline {
         // 8️⃣ Trivy Scan Docker Image
         stage('Trivy - Docker Image Scan') {
             steps {
-                sh """
-                    trivy image --exit-code 0 --severity HIGH,CRITICAL ${DOCKER_IMAGE}:${IMAGE_TAG} > trivy-image-report.txt
-                """
+                timeout(time: 15, unit: 'MINUTES') {
+                    sh """
+                        trivy image --skip-db-update --scanners vuln --exit-code 0 --severity HIGH,CRITICAL ${DOCKER_IMAGE}:${IMAGE_TAG} > trivy-image-report.txt
+                    """
+                }
                 archiveArtifacts artifacts: 'trivy-image-report.txt', fingerprint: true
             }
         }
