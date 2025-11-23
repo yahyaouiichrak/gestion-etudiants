@@ -29,7 +29,7 @@ pipeline {
             sh "mvn sonar:sonar \
                 -Dsonar.projectKey=gestion-etudiants \
                 -Dsonar.projectName=gestion-etudiants \
-                -Dsonar.host.url=http://localhost:9000 \
+                -Dsonar.host.url=http://10.0.0.2:9000 \
                 -Dsonar.login=${SONAR_TOKEN}"
             }
         }
