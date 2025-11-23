@@ -70,7 +70,7 @@ pipeline {
         // 6️⃣ Build JAR
         stage('Build JAR') {
             steps {
-                sh 'mvn -B clean package -DskipTests'
+                sh 'mvn -B clean package'
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
