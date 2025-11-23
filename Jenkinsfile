@@ -8,9 +8,7 @@ pipeline {
 
     stages {
 
-        // ----------------------------------
-        // 1️⃣ Checkout code & définir IMAGE_TAG
-        // ----------------------------------
+        // 1️⃣ Checkout + tag image
         stage('Checkout Code') {
             steps {
                 checkout scm
@@ -21,29 +19,24 @@ pipeline {
             }
         }
 
-        // ----------------------------------
-        // 2️⃣ SonarQube : Analyse qualité du code
-        // ----------------------------------
+        // 2️⃣ Analyse SonarQube
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonar-server') {
                     sh """
                         mvn clean install -DskipTests
                         mvn sonar:sonar \
-                        -Dsonar.projectKey=gestion-etudiants \
-                        -Dsonar.projectName=gestion-etudiants \
-                        -Dsonar.host.url=http://10.0.0.2:9000 \
-                        -Dsonar.login=$SONAR_TOKEN \
-                        -Dsonar.java.binaries=target/classes
+                          -Dsonar.projectKey=gestion-etudiants \
+                          -Dsonar.projectName=gestion-etudiants \
+                          -Dsonar.host.url=http://10.0.0.2:9000 \
+                          -Dsonar.login=$SONAR_TOKEN \
+                          -Dsonar.java.binaries=target/classes
                     """
                 }
             }
         }
 
-
-        // ----------------------------------
-        // 3️⃣ Trivy : Scan code source
-        // ----------------------------------
+        // 3️⃣ Trivy FS
         stage('Trivy - File System Scan') {
             steps {
                 sh """
@@ -53,9 +46,7 @@ pipeline {
             }
         }
 
-        // ----------------------------------
-        // 4️⃣ Démarrer PostgreSQL pour tests
-        // ----------------------------------
+        // 4️⃣ PostgreSQL Test Container
         stage('Start PostgreSQL for tests') {
             steps {
                 sh '''
@@ -69,28 +60,22 @@ pipeline {
             }
         }
 
-        // ----------------------------------
-        // 5️⃣ Run Tests Maven
-        // ----------------------------------
+        // 5️⃣ Tests Maven
         stage('Run Tests') {
             steps {
                 sh 'mvn -Dspring.profiles.active=test test'
             }
         }
 
-        // ----------------------------------
-        // 6️⃣ Build JAR Maven
-        // ----------------------------------
+        // 6️⃣ Build JAR
         stage('Build JAR') {
             steps {
-                sh 'mvn -B clean package'
+                sh 'mvn -B clean package -DskipTests'
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
 
-        // ----------------------------------
-        // 7️⃣ Build Docker image
-        // ----------------------------------
+        // 7️⃣ Docker build
         stage('Docker Build') {
             steps {
                 sh """
@@ -99,9 +84,7 @@ pipeline {
             }
         }
 
-        // ----------------------------------
-        // 8️⃣ Trivy : Scan Docker image
-        // ----------------------------------
+        // 8️⃣ Trivy Scan Docker Image
         stage('Trivy - Docker Image Scan') {
             steps {
                 sh """
@@ -111,9 +94,7 @@ pipeline {
             }
         }
 
-        // ----------------------------------
-        // 9️⃣ Push Docker image
-        // ----------------------------------
+        // 9️⃣ Docker Push
         stage('Docker Push') {
             environment {
                 DOCKERHUB_CREDS = credentials('dockerhub-creds')
@@ -129,9 +110,6 @@ pipeline {
         }
     }
 
-    // ----------------------------------
-    // Post-actions
-    // ----------------------------------
     post {
         always {
             sh "docker rm -f pg-test || true"
